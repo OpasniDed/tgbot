@@ -1,13 +1,14 @@
-from aiogram import Bot, Dispatcher, executor, types
 import config
 import markups as nav
-from aiogram.types import ReplyKeyboardRemove
-import random
+
+from aiogram import Bot, Dispatcher, executor, types
 
 
 bot = Bot(config.BOT_TOKEN) #<- Токен бота который находится в config.py
 dp = Dispatcher(bot)
 
+
+PRICE = types.LabeledPrice(label='Покупка доступа к каналу', amount=200 * 100)
 
 # Команда /start и отправка сообщения с фото + кнопками, которые находятся в папке keyboards, файл markups.py
 @dp.message_handler(commands=['start'])
@@ -20,7 +21,27 @@ async def start(message: types.Message):
 
 @dp.message_handler(text=['💰 Купить'])
 async def on_click(message: types.Message):
-    await bot.send_invoice(message.chat.id, 'Покупка туториала', 'Покупка туториала по фазме', 'invoice', config.PAYMENT_TOKEN, 'RUB', [types.LabeledPrice('Покупка туториала', 200 * 100)])
+    await bot.send_invoice(message.chat.id,
+                           title="Покупка",
+                           description="Покупка доступа к каналу обучения",
+                           provider_token=config.PAYMENT_TOKEN,
+                           currency="rub",
+                           is_flexible=False,
+                           prices=[PRICE],
+                           start_parameter="tutorial-buy",
+                           payload="test-invoice")
+
+
+
+@dp.pre_checkout_query_handler(lambda query: True)
+async def pre(pre_checkout_q: types.PreCheckoutQuery):
+    await bot.answer_pre_checkout_query(pre_checkout_q.id, ok=True)
+
+
+@dp.message_handler(content_types=types.ContentType.SUCCESSFUL_PAYMENT)
+async def succes(message: types.Message):
+    await message.answer(f'Платеж на сумму {message.successful_payment.total_amount // 100} {message.successful_payment.currency} прошел успешно')
+    await message.answer('<a href="https://t.me/+sXmo-2umpRo3NzEy">Приватный канал</a>', parse_mode='html')
 
 
 
@@ -58,11 +79,8 @@ async def menu(message):
     await bot.send_message(message.chat.id, 'Выберите кнопку', reply_markup=nav.mainMenu)
 
 
-@dp.message_handler(content_types=types.ContentType.SUCCESSFUL_PAYMENT)
-async def succes(message: types.Message):
-    await message.answer(f'Успешно: {message.successful_payment.order_info}\n<a href="https://t.me/+sXmo-2umpRo3NzEy">Приватный канал</a>', parse_mode="html")
 
 
-
-executor.start_polling(dp)
+if __name__ == "__main__":
+    executor.start_polling(dp, skip_updates=False)
 
