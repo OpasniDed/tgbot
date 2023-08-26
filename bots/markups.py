@@ -20,6 +20,17 @@ otherMenu = ReplyKeyboardMarkup(resize_keyboard=True).add(b3, b1, b2, btnmenu)
 
 
 
+# Админ панель
+mainpanel = ReplyKeyboardMarkup(resize_keyboard=True)
+btnadm = KeyboardButton('Админ-Панель')
+mainpanel = ReplyKeyboardMarkup(resize_keyboard=True).add(btnBuy, btnInfo, btnInfoGame, btndop).add(btnadm)
+
+adminpanel = ReplyKeyboardMarkup(resize_keyboard=True)
+adminpanel.add('Добавить товар', 'Удалить товар').add('Сделать рассылку').add('⬅ Меню')
+
+
+
+
 
 # b1 = KeyboardButton('Купить')
 # b2 = KeyboardButton('Подробнее')
